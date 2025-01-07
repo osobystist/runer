@@ -19,6 +19,27 @@ function final(self)
 	msg.post('.', 'release_input_focus')
 end
 
+local function animation(self, anim)
+	-- відтворювати лише ті анімації, які ще не відтворюються
+	if self.anim ~= anim then
+		-- скажіть моделі хребта відтворити анімацію
+		local anim_props = { blend_duration = 0.15 }
+		spine.play_anim('#spinemodel', anim, go.PLAYBACK_LOOP_FORWARD, anim_props)
+		self.anim = anim
+	end
+end
+
+local function update_animation(self)
+	-- make sure the right animation is playing
+	if self.ground_contact then
+		play_animation(self, hash("run"))
+	else
+		play_animation(self, hash("jump"))
+
+	end
+end
+		
+
 function update(self, dt)
 	local gravity = vmath.vector3(0, gravity, 0)
 
@@ -29,10 +50,12 @@ function update(self, dt)
 
 	-- застосувати вектор швидкості до персонажа гравця
 	go.set_position(go.get_position() + self.velocity * dt)
-
+	update_animation(self)
 	self.correction = vmath.vector3()
 	self.ground_contact = false
 end
+
+
 
 local function handle_geometry_contact(self, normal, distance)
 	-- спроектувати вектор корекції на контактну нормаль
